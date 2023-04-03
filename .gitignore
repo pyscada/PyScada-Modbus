@@ -1,0 +1,14 @@
+*.log
+*.pot
+*.pyc
+local_settings.py
+build
+PyScada.egg-info
+dist
+/.project
+docs/_build
+/.idea/*
+
+# Emacs backup files
+*~
+/pyscada_modbus.egg-info/*
