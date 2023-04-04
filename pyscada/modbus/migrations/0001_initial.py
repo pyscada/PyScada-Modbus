@@ -7,11 +7,7 @@ from django.db import models, migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('pyscada', '0001_initial'),
-    ]
-    
-    run_before = [
-        ('pyscada', '0002_event_hysteresis'),
+        ('pyscada', '0010_auto_20160115_0918'),
     ]
 
     operations = [
@@ -23,7 +19,7 @@ class Migration(migrations.Migration):
                 ('ip_address', models.GenericIPAddressField(default='127.0.0.1')),
                 ('port', models.CharField(default='502', help_text='for TCP and UDP enter network port as number (def. 502, for serial ASCII and RTU enter serial port (/dev/pts/13))', max_length=400)),
                 ('unit_id', models.PositiveSmallIntegerField(default=0)),
-                ('modbus_client', models.OneToOneField(to='pyscada.Client', on_delete=models.CASCADE)),
+                ('modbus_client', models.OneToOneField(to='pyscada.Device', on_delete=models.CASCADE)),
             ],
             options={
             },

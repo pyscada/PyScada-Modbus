@@ -9,10 +9,6 @@ class Migration(migrations.Migration):
     dependencies = [
         ('modbus', '0001_initial'),
     ]
-    
-    run_before = [
-        ('pyscada', '0010_auto_20160115_0918'),
-    ]
 
     operations = [
         migrations.AddField(
