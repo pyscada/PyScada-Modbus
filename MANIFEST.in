@@ -4,4 +4,3 @@ include README.rst
 include CHANGELOG.txt
 recursive-include pyscada/modbus *
 recursive-exclude * *.pyc
-

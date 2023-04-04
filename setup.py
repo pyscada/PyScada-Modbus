@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from setuptools import setup, find_packages
 import os
-from pyscada import  modbus as pyscada_app
+from pyscada import modbus as pyscada_app
 
 
 CLASSIFIERS = [
