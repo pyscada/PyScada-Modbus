@@ -32,7 +32,7 @@ setup(
     classifiers=CLASSIFIERS,
     install_requires=[
         'pyscada>=0.8.0',
-        'pymodbus>=1.2',
+        'pymodbus>=1.2,<3',
         'pyserial',
     ],
     packages=find_packages(exclude=["project", "project.*"]),
