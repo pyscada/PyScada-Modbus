@@ -89,7 +89,7 @@ class RegisterBlock:
             # something went wrong (ie. Server/Slave is not accessible)
             # todo add log for some specific errors
             var = traceback.format_exc()
-            logger.error("exeption while request_data of %s" % var)
+            logger.error(f"exeption while request_data of {var}", exc_info=True)
             return None
         if hasattr(result, 'registers'):
             return self.decode_data(result.registers)
@@ -112,7 +112,7 @@ class RegisterBlock:
                     if isnan(out[v_id]) or isinf(out[v_id]):
                         out[v_id] = None
             except IndexError as e:
-                logger.error("IndexError while unpacking : %s - registers_data : %s" % (e, str(self.registers_data)))
+                logger.error(f"IndexError while unpacking : {e} - registers_data : {self.registers_data}", exc_info=True)
                 out[v_id] = None
         return out
 
@@ -312,7 +312,7 @@ class Device:
         if not self._connect():
             self._device_not_accessible -= 1
             if self._device_not_accessible == -1:  #
-                logger.error("device with id: %d is not accessible" % self.device.pk)
+                logger.error(f"device with id: {self.device.pk} is not accessible", exc_info=True)
             return []
         output = []
         for register_block in self._variable_config:
@@ -336,7 +336,7 @@ class Device:
             else:
                 for variable_id in register_block.variables:
                     if self.variables[variable_id].accessible == -1:
-                        logger.error("variable with id: %d is not accessible" % variable_id)
+                        logger.error(f"variable with id: {variable_id} is not accessible", exc_info=True)
                         self.variables[variable_id].update_value(None, time())
                     self.variables[variable_id].accessible -= 1
 
@@ -382,7 +382,7 @@ class Device:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error('Modbus Address %d out of range' % self.variables[variable_id].modbusvariable.address)
+                logger.error(f'Modbus Address {self.variables[variable_id].modbusvariable.address} out of range', exc_info=True)
                 return output
         elif self.variables[variable_id].modbusvariable.function_code_read == 1:
             # write coil
@@ -398,8 +398,7 @@ class Device:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error('Modbus Address %d out of range' % self.variables[variable_id].modbusvariable.address)
+                logger.error(f'Modbus Address {self.variables[variable_id].modbusvariable.address} out of range', exc_info=True)
         else:
-            logger.error('wrong type of function code %d' %
-                         self.variables[variable_id].modbusvariable.function_code_read)
+            logger.error(f'wrong type of function code {self.variables[variable_id].modbusvariable.function_code_read}', exc_info=True)
             return output
