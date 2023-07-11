@@ -19,7 +19,13 @@ class ModbusDeviceAdminInline(admin.StackedInline):
 
 
 class ModbusDeviceAdmin(DeviceAdmin):
-    list_display = DeviceAdmin.list_display + ('protocol_modbus', 'framer', 'ip_address', 'port', 'unit_id')
+    list_display = DeviceAdmin.list_display + (
+        "protocol_modbus",
+        "framer",
+        "ip_address",
+        "port",
+        "unit_id",
+    )
 
     def protocol_modbus(self, instance):
         try:
@@ -49,19 +55,19 @@ class ModbusDeviceAdmin(DeviceAdmin):
         return instance.modbusdevice.unit_id
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'protocol':
-            kwargs['queryset'] = DeviceProtocol.objects.filter(pk=PROTOCOL_ID)
+        if db_field.name == "protocol":
+            kwargs["queryset"] = DeviceProtocol.objects.filter(pk=PROTOCOL_ID)
             db_field.default = PROTOCOL_ID
-        return super(ModbusDeviceAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        return super(ModbusDeviceAdmin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
 
     def get_queryset(self, request):
         """Limit Pages to those that belong to the request's user."""
         qs = super(ModbusDeviceAdmin, self).get_queryset(request)
         return qs.filter(protocol_id=PROTOCOL_ID)
 
-    inlines = [
-        ModbusDeviceAdminInline
-    ]
+    inlines = [ModbusDeviceAdminInline]
 
 
 class ModbusVariableAdminInline(admin.StackedInline):
@@ -69,7 +75,10 @@ class ModbusVariableAdminInline(admin.StackedInline):
 
 
 class ModbusVariableAdmin(CoreVariableAdmin):
-    list_display = CoreVariableAdmin.list_display + ('address', 'function_code_read',)
+    list_display = CoreVariableAdmin.list_display + (
+        "address",
+        "function_code_read",
+    )
 
     def address(self, instance):
         return instance.modbusvariable.address
@@ -78,18 +87,18 @@ class ModbusVariableAdmin(CoreVariableAdmin):
         return instance.modbusvariable.function_code_read
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'device':
-            kwargs['queryset'] = Device.objects.filter(protocol=PROTOCOL_ID)
-        return super(ModbusVariableAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+        if db_field.name == "device":
+            kwargs["queryset"] = Device.objects.filter(protocol=PROTOCOL_ID)
+        return super(ModbusVariableAdmin, self).formfield_for_foreignkey(
+            db_field, request, **kwargs
+        )
 
     def get_queryset(self, request):
         """Limit Pages to those that belong to the request's user."""
         qs = super(ModbusVariableAdmin, self).get_queryset(request)
         return qs.filter(device__protocol_id=PROTOCOL_ID)
 
-    inlines = [
-        ModbusVariableAdminInline
-    ]
+    inlines = [ModbusVariableAdminInline]
 
 
 # admin_site.register(ExtendedModbusDevice, ModbusDeviceAdmin)

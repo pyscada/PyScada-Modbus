@@ -6,15 +6,18 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('modbus', '0007_extendedmodbusdevice_extendedmodbusvariable'),
+        ("modbus", "0007_extendedmodbusdevice_extendedmodbusvariable"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='modbusdevice',
-            name='framer',
-            field=models.PositiveSmallIntegerField(blank=True, choices=[(0, 'Socket'), (1, 'RTU'), (2, 'ASCII'), (3, 'Binary')], null=True),
+            model_name="modbusdevice",
+            name="framer",
+            field=models.PositiveSmallIntegerField(
+                blank=True,
+                choices=[(0, "Socket"), (1, "RTU"), (2, "ASCII"), (3, "Binary")],
+                null=True,
+            ),
         ),
     ]

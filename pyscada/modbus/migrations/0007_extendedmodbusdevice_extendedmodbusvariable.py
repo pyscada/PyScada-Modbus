@@ -6,35 +6,32 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('pyscada', '0039_auto_20170711_1326'),
-        ('modbus', '0006_auto_20170711_1326'),
+        ("pyscada", "0039_auto_20170711_1326"),
+        ("modbus", "0006_auto_20170711_1326"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ExtendedModbusDevice',
-            fields=[
-            ],
+            name="ExtendedModbusDevice",
+            fields=[],
             options={
-                'verbose_name': 'Modbus Device',
-                'proxy': True,
-                'verbose_name_plural': 'Modbus Devices',
-                'indexes': [],
+                "verbose_name": "Modbus Device",
+                "proxy": True,
+                "verbose_name_plural": "Modbus Devices",
+                "indexes": [],
             },
-            bases=('pyscada.device',),
+            bases=("pyscada.device",),
         ),
         migrations.CreateModel(
-            name='ExtendedModbusVariable',
-            fields=[
-            ],
+            name="ExtendedModbusVariable",
+            fields=[],
             options={
-                'verbose_name': 'Modbus Variable',
-                'proxy': True,
-                'verbose_name_plural': 'Modbus Variables',
-                'indexes': [],
+                "verbose_name": "Modbus Variable",
+                "proxy": True,
+                "verbose_name_plural": "Modbus Variables",
+                "indexes": [],
             },
-            bases=('pyscada.variable',),
+            bases=("pyscada.variable",),
         ),
     ]

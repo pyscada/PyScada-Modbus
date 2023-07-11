@@ -6,15 +6,23 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('modbus', '0005_auto_20170224_1249'),
+        ("modbus", "0005_auto_20170224_1249"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='modbusvariable',
-            name='function_code_read',
-            field=models.PositiveSmallIntegerField(choices=[(0, 'not selected'), (1, 'coils (FC1)'), (2, 'discrete inputs (FC2)'), (3, 'holding registers (FC3)'), (4, 'input registers (FC4)')], default=0),
+            model_name="modbusvariable",
+            name="function_code_read",
+            field=models.PositiveSmallIntegerField(
+                choices=[
+                    (0, "not selected"),
+                    (1, "coils (FC1)"),
+                    (2, "discrete inputs (FC2)"),
+                    (3, "holding registers (FC3)"),
+                    (4, "input registers (FC4)"),
+                ],
+                default=0,
+            ),
         ),
     ]

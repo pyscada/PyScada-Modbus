@@ -46,18 +46,24 @@ class RegisterBlock:
         self.variables = {}
         self.register_size = 16  # in bits
 
-    def insert_item(self, variable_id, variable_address, decode_value=_default_decoder, variable_length=1):
+    def insert_item(
+        self,
+        variable_id,
+        variable_address,
+        decode_value=_default_decoder,
+        variable_length=1,
+    ):
         self.variables[variable_id] = {
-            'decode_function': decode_value,
-            'len': variable_length,
-            'registers': []
+            "decode_function": decode_value,
+            "len": variable_length,
+            "registers": [],
         }
         for idx in range(int(variable_length / self.register_size)):
             if not (variable_address + idx) in self.registers_data:
                 # register will not be queried add register
                 self.registers_data[variable_address + idx] = None
 
-            self.variables[variable_id]['registers'].append(variable_address + idx)
+            self.variables[variable_id]["registers"].append(variable_address + idx)
         self.registers = list(self.registers_data.keys())
         self.registers.sort()
 
@@ -81,9 +87,9 @@ class RegisterBlock:
         try:
             result = self._request_data(slave, unit, first_address, quantity)
         except ConnectionException as e:
-            #logger.debug(str(self) + " - " + str(slave) + " - " + str(unit) + " - " + str(first_address) + " - " +
+            # logger.debug(str(self) + " - " + str(slave) + " - " + str(unit) + " - " + str(first_address) + " - " +
             #             str(quantity))
-            #logger.info(e)
+            # logger.info(e)
             return None
         except:
             # something went wrong (ie. Server/Slave is not accessible)
@@ -91,9 +97,9 @@ class RegisterBlock:
             var = traceback.format_exc()
             logger.error(f"exeption while request_data of {var}", exc_info=True)
             return None
-        if hasattr(result, 'registers'):
+        if hasattr(result, "registers"):
             return self.decode_data(result.registers)
-        elif hasattr(result, 'bits'):
+        elif hasattr(result, "bits"):
             return self.decode_data(result.bits)
         else:
             slave.modbus_result = result
@@ -106,13 +112,17 @@ class RegisterBlock:
             self.registers_data[idx] = result.pop(0)
         for v_id in self.variables:
             try:
-                out[v_id] = self.variables[v_id]['decode_function'](
-                    [self.registers_data[k] for k in self.variables[v_id]['registers']])
+                out[v_id] = self.variables[v_id]["decode_function"](
+                    [self.registers_data[k] for k in self.variables[v_id]["registers"]]
+                )
                 if type(out[v_id]) is float:
                     if isnan(out[v_id]) or isinf(out[v_id]):
                         out[v_id] = None
             except IndexError as e:
-                logger.error(f"IndexError while unpacking : {e} - registers_data : {self.registers_data}", exc_info=True)
+                logger.error(
+                    f"IndexError while unpacking : {e} - registers_data : {self.registers_data}",
+                    exc_info=True,
+                )
                 out[v_id] = None
         return out
 
@@ -170,7 +180,7 @@ class Device:
         if self._bytesize == 0:
             self._bytesize = Defaults.Bytesize
         # parity
-        parity_list = {0: Defaults.Parity, 1: 'N', 2: 'E', 3: 'O'}
+        parity_list = {0: Defaults.Parity, 1: "N", 2: "E", 3: "O"}
         self._parity = parity_list[self._parity]
         # baudrate
         if self._baudrate == 0:
@@ -188,9 +198,8 @@ class Device:
         self.data = []
 
     def _prepare_variable_config(self, device):
-
         for var in device.variable_set.filter(active=1):
-            if not hasattr(var, 'modbusvariable'):
+            if not hasattr(var, "modbusvariable"):
                 continue
             f_c = var.modbusvariable.function_code_read
             if f_c == 0:
@@ -204,13 +213,29 @@ class Device:
             if f_c == 1:  # coils
                 self.trans_coils.append([var.modbusvariable.address, var.pk, f_c])
             elif f_c == 2:  # discrete inputs
-                self.trans_discrete_inputs.append([var.modbusvariable.address, var.pk, f_c])
+                self.trans_discrete_inputs.append(
+                    [var.modbusvariable.address, var.pk, f_c]
+                )
             elif f_c == 3:  # holding registers
                 self.trans_holding_registers.append(
-                    [var.modbusvariable.address, var.decode_value, var.get_bits_by_class(), var.pk, f_c])
+                    [
+                        var.modbusvariable.address,
+                        var.decode_value,
+                        var.get_bits_by_class(),
+                        var.pk,
+                        f_c,
+                    ]
+                )
             elif f_c == 4:  # input registers
                 self.trans_input_registers.append(
-                    [var.modbusvariable.address, var.decode_value, var.get_bits_by_class(), var.pk, f_c])
+                    [
+                        var.modbusvariable.address,
+                        var.decode_value,
+                        var.get_bits_by_class(),
+                        var.pk,
+                        f_c,
+                    ]
+                )
             else:
                 continue
 
@@ -227,7 +252,9 @@ class Device:
             if (entry[0] != old) or regcount > 122:
                 regcount = 0
                 out.append(InputRegisterBlock())  # start new register block
-            out[-1].insert_item(entry[3], entry[0], entry[1], entry[2])  # add item to block
+            out[-1].insert_item(
+                entry[3], entry[0], entry[1], entry[2]
+            )  # add item to block
             old = entry[0] + entry[2] / 16
             regcount += entry[2] / 16
 
@@ -238,7 +265,9 @@ class Device:
             if (entry[0] != old) or regcount > 122:
                 regcount = 0
                 out.append(HoldingRegisterBlock())  # start new register block
-            out[-1].insert_item(entry[3], entry[0], entry[1], entry[2])  # add item to block
+            out[-1].insert_item(
+                entry[3], entry[0], entry[1], entry[2]
+            )  # add item to block
             old = entry[0] + entry[2] / 16
             regcount += entry[2] / 16
 
@@ -274,16 +303,24 @@ class Device:
 
         if self._protocol == 0:  # TCP
             if self._framer is None:  # No Framer
-                self.slave = ModbusTcpClient(self._address, int(self._port), timeout=self._timeout)
+                self.slave = ModbusTcpClient(
+                    self._address, int(self._port), timeout=self._timeout
+                )
             else:
-                self.slave = ModbusTcpClient(self._address, int(self._port), timeout=self._timeout, framer=framer)
+                self.slave = ModbusTcpClient(
+                    self._address, int(self._port), timeout=self._timeout, framer=framer
+                )
         elif self._protocol == 1:  # UDP
             if self._framer is None:  # No Framer
-                self.slave = ModbusUdpClient(self._address, int(self._port), timeout=self._timeout)
+                self.slave = ModbusUdpClient(
+                    self._address, int(self._port), timeout=self._timeout
+                )
             else:
-                self.slave = ModbusUdpClient(self._address, int(self._port), timeout=self._timeout, framer=framer)
+                self.slave = ModbusUdpClient(
+                    self._address, int(self._port), timeout=self._timeout, framer=framer
+                )
         elif self._protocol in (2, 3, 4):  # serial
-            method_list = {2: 'ascii', 3: 'rtu', 4: 'binary'}
+            method_list = {2: "ascii", 3: "rtu", 4: "binary"}
             self.slave = ModbusSerialClient(
                 method=method_list[self._protocol],
                 port=self._port,
@@ -291,7 +328,8 @@ class Device:
                 bytesize=self._bytesize,
                 parity=self._parity,
                 baudrate=self._baudrate,
-                timeout=self._timeout)
+                timeout=self._timeout,
+            )
         else:
             raise NotImplementedError("Protocol not supported")
         status = self.slave.connect()
@@ -304,15 +342,15 @@ class Device:
         self.slave.close()
 
     def request_data(self):
-        """
-
-        """
+        """ """
         if not driver_ok:
             return None
         if not self._connect():
             self._device_not_accessible -= 1
             if self._device_not_accessible == -1:  #
-                logger.error(f"device with id: {self.device.pk} is not accessible", exc_info=True)
+                logger.error(
+                    f"device with id: {self.device.pk} is not accessible", exc_info=True
+                )
             return []
         output = []
         for register_block in self._variable_config:
@@ -321,22 +359,34 @@ class Device:
                 self._disconnect()
                 self._connect()
                 result = register_block.request_data(self.slave, self._unit_id)
-                if result is None and hasattr(self.slave, 'modbus_result'):
-                    logger.warning("Modbus requested data for %s(%s) has no bits nor registers, it's : %s" % (self.device, register_block, self.slave.modbus_result))
+                if result is None and hasattr(self.slave, "modbus_result"):
+                    logger.warning(
+                        "Modbus requested data for %s(%s) has no bits nor registers, it's : %s"
+                        % (self.device, register_block, self.slave.modbus_result)
+                    )
 
             if result is not None:
                 for variable_id in register_block.variables:
-                    if self.variables[variable_id].update_value(result[variable_id], time()):
-                        recorded_data_element = self.variables[variable_id].create_recorded_data_element()
+                    if self.variables[variable_id].update_value(
+                        result[variable_id], time()
+                    ):
+                        recorded_data_element = self.variables[
+                            variable_id
+                        ].create_recorded_data_element()
                         if recorded_data_element is not None:
                             output.append(recorded_data_element)
                     if self.variables[variable_id].accessible < 1:
-                        logger.info("variable with id: %d is now accessible" % variable_id)
+                        logger.info(
+                            "variable with id: %d is now accessible" % variable_id
+                        )
                         self.variables[variable_id].accessible = 1
             else:
                 for variable_id in register_block.variables:
                     if self.variables[variable_id].accessible == -1:
-                        logger.error(f"variable with id: {variable_id} is not accessible", exc_info=True)
+                        logger.error(
+                            f"variable with id: {variable_id} is not accessible",
+                            exc_info=True,
+                        )
                         self.variables[variable_id].update_value(None, time())
                     self.variables[variable_id].accessible -= 1
 
@@ -363,42 +413,66 @@ class Device:
         if self.variables[variable_id].modbusvariable.function_code_read == 3:
             # write register
             if 0 <= self.variables[variable_id].modbusvariable.address <= 65535:
-
                 if self._connect():
                     if self.variables[variable_id].get_bits_by_class() / 16 == 1:
                         # just write the value to one register
-                        self.slave.write_register(self.variables[variable_id].modbusvariable.address, int(value),
-                                                  unit=self._unit_id)
+                        self.slave.write_register(
+                            self.variables[variable_id].modbusvariable.address,
+                            int(value),
+                            unit=self._unit_id,
+                        )
                     else:
                         # encode it first
-                        self.slave.write_registers(self.variables[variable_id].modbusvariable.address,
-                                                   list(self.variables[variable_id].encode_value(value)),
-                                                   unit=self._unit_id)
+                        self.slave.write_registers(
+                            self.variables[variable_id].modbusvariable.address,
+                            list(self.variables[variable_id].encode_value(value)),
+                            unit=self._unit_id,
+                        )
                     self._disconnect()
-                    if value is not None and self.variables[variable_id].update_value(value, time()):
-                        output.append(self.variables[variable_id].create_recorded_data_element())
+                    if value is not None and self.variables[variable_id].update_value(
+                        value, time()
+                    ):
+                        output.append(
+                            self.variables[variable_id].create_recorded_data_element()
+                        )
                     return output
                 else:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error(f'Modbus Address {self.variables[variable_id].modbusvariable.address} out of range', exc_info=True)
+                logger.error(
+                    f"Modbus Address {self.variables[variable_id].modbusvariable.address} out of range",
+                    exc_info=True,
+                )
                 return output
         elif self.variables[variable_id].modbusvariable.function_code_read == 1:
             # write coil
             if 0 <= self.variables[variable_id].modbusvariable.address <= 65535:
                 if self._connect():
-                    self.slave.write_coil(self.variables[variable_id].modbusvariable.address, bool(value),
-                                          unit=self._unit_id)
+                    self.slave.write_coil(
+                        self.variables[variable_id].modbusvariable.address,
+                        bool(value),
+                        unit=self._unit_id,
+                    )
                     self._disconnect()
-                    if value is not None and self.variables[variable_id].update_value(value, time()):
-                        output.append(self.variables[variable_id].create_recorded_data_element())
+                    if value is not None and self.variables[variable_id].update_value(
+                        value, time()
+                    ):
+                        output.append(
+                            self.variables[variable_id].create_recorded_data_element()
+                        )
                     return output
                 else:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error(f'Modbus Address {self.variables[variable_id].modbusvariable.address} out of range', exc_info=True)
+                logger.error(
+                    f"Modbus Address {self.variables[variable_id].modbusvariable.address} out of range",
+                    exc_info=True,
+                )
         else:
-            logger.error(f'wrong type of function code {self.variables[variable_id].modbusvariable.function_code_read}', exc_info=True)
+            logger.error(
+                f"wrong type of function code {self.variables[variable_id].modbusvariable.function_code_read}",
+                exc_info=True,
+            )
             return output
