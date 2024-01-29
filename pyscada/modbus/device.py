@@ -348,9 +348,7 @@ class Device:
         if not self._connect():
             self._device_not_accessible -= 1
             if self._device_not_accessible == -1:  #
-                logger.error(
-                    f"device with id: {self.device.pk} is not accessible", exc_info=True
-                )
+                logger.info(f"device with id: {self.device.pk} is not accessible")
             return []
         output = []
         for register_block in self._variable_config:
@@ -367,14 +365,10 @@ class Device:
 
             if result is not None:
                 for variable_id in register_block.variables:
-                    if self.variables[variable_id].update_value(
-                        result[variable_id], time()
+                    if self.variables[variable_id].update_values(
+                        [result[variable_id]], [time()]
                     ):
-                        recorded_data_element = self.variables[
-                            variable_id
-                        ].create_recorded_data_element()
-                        if recorded_data_element is not None:
-                            output.append(recorded_data_element)
+                        output.append(self.variables[variable_id])
                     if self.variables[variable_id].accessible < 1:
                         logger.info(
                             "variable with id: %d is now accessible" % variable_id
@@ -383,11 +377,10 @@ class Device:
             else:
                 for variable_id in register_block.variables:
                     if self.variables[variable_id].accessible == -1:
-                        logger.error(
-                            f"variable with id: {variable_id} is not accessible",
-                            exc_info=True,
+                        logger.info(
+                            f"variable with id: {variable_id} is not accessible"
                         )
-                        self.variables[variable_id].update_value(None, time())
+                        self.variables[variable_id].update_values([None], [time()])
                     self.variables[variable_id].accessible -= 1
 
         # reset device not accessible status
@@ -429,18 +422,16 @@ class Device:
                             unit=self._unit_id,
                         )
                     self._disconnect()
-                    if value is not None and self.variables[variable_id].update_value(
-                        value, time()
+                    if value is not None and self.variables[variable_id].update_values(
+                        [value], [time()]
                     ):
-                        output.append(
-                            self.variables[variable_id].create_recorded_data_element()
-                        )
+                        output.append(self.variables[variable_id])
                     return output
                 else:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error(
+                logger.warning(
                     f"Modbus Address {self.variables[variable_id].modbusvariable.address} out of range",
                     exc_info=True,
                 )
@@ -455,23 +446,21 @@ class Device:
                         unit=self._unit_id,
                     )
                     self._disconnect()
-                    if value is not None and self.variables[variable_id].update_value(
-                        value, time()
+                    if value is not None and self.variables[variable_id].update_values(
+                        [value], [time()]
                     ):
-                        output.append(
-                            self.variables[variable_id].create_recorded_data_element()
-                        )
+                        output.append(self.variables[variable_id])
                     return output
                 else:
                     logger.info("device with id: %d is not accessible" % self.device.pk)
                     return output
             else:
-                logger.error(
+                logger.warning(
                     f"Modbus Address {self.variables[variable_id].modbusvariable.address} out of range",
                     exc_info=True,
                 )
         else:
-            logger.error(
+            logger.warning(
                 f"wrong type of function code {self.variables[variable_id].modbusvariable.function_code_read}",
                 exc_info=True,
             )
