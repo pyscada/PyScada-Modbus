@@ -360,7 +360,7 @@ class Device:
                 if result is None and hasattr(self.slave, "modbus_result"):
                     logger.warning(
                         "Modbus requested data for %s(%s) has no bits nor registers, it's : %s"
-                        % (self.device, register_block, self.slave.modbus_result)
+                        % (self.device, register_block.registers_data, self.slave.modbus_result)
                     )
 
             if result is not None:
